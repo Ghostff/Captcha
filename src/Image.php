@@ -29,6 +29,13 @@ class Image extends Color
         $this->properties['background']['color'] = $background;
         $this->font_dir = __DIR__ . DIRECTORY_SEPARATOR . 'fonts' . DIRECTORY_SEPARATOR;
         $this->font = $this->font_dir . 'Aller_Rg.ttf';
+
+        $this->image = imagecreatetruecolor($width, $height);
+        if ($background == self::TRANSPARENT)
+        {
+            imagecolortransparent($this->image, $this->color('black'));
+        }
+
     }
 
     public function border(array $size, array $color): void
@@ -107,63 +114,55 @@ class Image extends Color
         $height = $this->properties['height'];
         $width = $this->properties['width'];
 
+
         $border_left = $this->properties['border']['left'] ?? 0;
         $border_right = $this->properties['border']['right'] ?? 0;
         $border_top = $this->properties['border']['top'] ?? 0;
         $border_bottom = $this->properties['border']['bottom'] ?? 0;
         $border_color = $this->properties['border']['color'] ?? null;
 
-        $this->image = imagecreatetruecolor($width, $height);
-        if (isset($this->properties['border']))
-        {
-            if ($border_top !== 0)
-            {
-                $color = $this->color($border_color[0] ?? $border_color[0]);
-                for ($i = 0; $i <= $border_top; $i++)
-                {
-                    imageline($this->image, 0, 0 + $i, $width, 0 + $i, $color);
-                }
-            }
-            if ($border_bottom !== 0)
-            {
-                $color = $this->color($border_color[2] ?? $border_color[0]);
-                for ($i = 0; $i <= $border_bottom; $i++)
-                {
-                    imageline($this->image, 0, $height - 1 - $i, $width, $height - 1 - $i, $color);
-                }
-            }
-            if ($border_left !== 0)
-            {
-                $color = $this->color($border_color[3] ?? $border_color[0]);
-                for ($i = 0; $i <= $border_left; $i++)
-                {
-                    imageline($this->image, 0 + $i, $height, 0 + $i, 0, $color);
-                }
-            }
-            if ($border_right !== 0)
-            {
-                $color = $this->color($border_color[1] ?? $border_color[0]);
-                for ($i = 0; $i <= $border_right; $i++)
-                {
-                    imageline($this->image, $width - 1 - $i, 0, $width - 1 - $i, $height, $color);
-                }
-            }
-        }
 
         if ( ! isset($this->properties['background']['image']))
         {
-            imagefilledrectangle($this->image,
-                ($width - $border_right - 1),
-                (0 + $border_top),
-                (0 + $border_left),
-                ($height - $border_bottom - 1),
-                $this->color($this->properties['background']['color'])
-            );
+            $color = $this->color($this->properties['background']['color']);
+            imagefilledrectangle($this->image, $width, $height, 0, 0, $color);
         }
         else
         {
             #$this->backgroundImage(($width - $border_right - 1), (0 + $border_top), (0 + $border_left), ($height - $border_bottom - 1));
         }
+
+        if (isset($this->properties['border']))
+        {
+            if ($border_top !== 0)
+            {
+                $color = $this->color($border_color[0] ?? $border_color[0]);
+                imagesetthickness($this->image, $border_top);
+                imageline($this->image, 0, 0, $width, 0, $color);
+            }
+            if ($border_bottom !== 0)
+            {
+                $color = $this->color($border_color[2] ?? $border_color[0]);
+                imagesetthickness($this->image, $border_bottom);
+                imageline($this->image, 0, $height - 1, $width, $height - 1, $color);
+
+            }
+            if ($border_left !== 0)
+            {
+                $color = $this->color($border_color[3] ?? $border_color[0]);
+                imagesetthickness($this->image, $border_left);
+                imageline($this->image, 0, $height, 0, 0, $color);
+            }
+            if ($border_right !== 0)
+            {
+                $color = $this->color($border_color[1] ?? $border_color[0]);
+                imagesetthickness($this->image, $border_right);
+                imageline($this->image, $width - 1, 0, $width - 1, $height, $color);
+            }
+
+        }
+
+
 
 
 
@@ -256,7 +255,7 @@ class Image extends Color
         if (preg_match('/\!(.*)|\%/', $font, $matches))
         {
             $fonts = array_diff(scandir($this->font_dir), array('..', '.'));
-            if ($matches[0] == self::RAND)
+            if ($matches[0] == Captcha::RAND)
             {
                 $font = array_rand($fonts, 1);
             }

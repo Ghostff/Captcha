@@ -6,8 +6,6 @@ class Color
 {
     const TRANSPARENT = 'transparent';
 
-    const RAND = '%';
-
     private $color = [
         'air_force_blue' => [93, 138, 168], 'alice_blue' => [240, 248, 255],'alizarin' => [227, 38, 54],'amaranth' => [229, 43, 80],'amber' => [255, 191, 0],
         'android_green' => [164, 198, 57],'apple_green' => [141, 182, 0],'apricot' => [251, 206, 177],'aquamarine' => [127, 255, 212],
@@ -86,7 +84,7 @@ class Color
 
             if (preg_match('/\!(.*)|\%/', $color, $matches))
             {
-                if ($matches[0] == self::RAND)
+                if ($matches[0] == Captcha::RAND)
                 {
                     $color = array_rand($this->color, 1);
                 }
